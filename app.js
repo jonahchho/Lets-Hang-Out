@@ -32,6 +32,7 @@ db.once('open', function () {
 // To load static files
 app.use(express.static('css'));
 app.use(express.static('js'));
+app.use(express.static('fonts'));
 
 // EJS
 app.use(expressLayouts);
@@ -82,6 +83,8 @@ io.on('connection', (socket) => {
 
     curRoom = data.roomID;
 
+    addedUser = true;
+
     socket.join(curRoom);
 
   });
@@ -94,6 +97,7 @@ io.on('connection', (socket) => {
 
             socket.username = data.username;
 
+            /*
             if(data.roomID != curRoom && curRoom != 0) {
 
               socket.leave(curRoom);
@@ -105,6 +109,9 @@ io.on('connection', (socket) => {
               curRoom = data.roomID;
 
             }
+            */
+
+            addedUser = true;
 
             socket.join(curRoom);
 
@@ -148,22 +155,28 @@ io.on('connection', (socket) => {
 
   socket.on('leave room', () => {
 
-    socket.leave(curRoom);
+    if(addedUser) {
 
-    if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
-      // echo globally that this client has left
-      socket.broadcast.to(curRoom).emit('user left', {
-        username: socket.username,
-        numUsers: 0
-      });
-    }
+      addedUser = false;
 
-    else {
-      // echo globally that this client has left
-      socket.broadcast.to(curRoom).emit('user left', {
-        username: socket.username,
-        numUsers: io.sockets.adapter.rooms[curRoom].length
-      });
+      socket.leave(curRoom);
+
+      if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
+        // echo globally that this client has left
+        socket.broadcast.to(curRoom).emit('user left', {
+          username: socket.username,
+          numUsers: 0
+        });
+      }
+
+      else {
+        // echo globally that this client has left
+        socket.broadcast.to(curRoom).emit('user left', {
+          username: socket.username,
+          numUsers: io.sockets.adapter.rooms[curRoom].length
+        });
+      }
+
     }
 
   });
@@ -171,23 +184,29 @@ io.on('connection', (socket) => {
   // when the user disconnects.. perform this
   socket.on('disconnect', () => {
 
-    if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
-      // echo globally that this client has left
-      socket.broadcast.to(curRoom).emit('user left', {
-        username: socket.username,
-        numUsers: 0
-      });
-    }
+    if(addedUser) {
 
-    else {
-      // echo globally that this client has left
-      socket.broadcast.to(curRoom).emit('user left', {
-        username: socket.username,
-        numUsers: io.sockets.adapter.rooms[curRoom].length
-      });
-    }
+      addedUser = false;
 
-    socket.leave(curRoom);
+      socket.leave(curRoom);
+
+      if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
+        // echo globally that this client has left
+        socket.broadcast.to(curRoom).emit('user left', {
+          username: socket.username,
+          numUsers: 0
+        });
+      }
+
+      else {
+        // echo globally that this client has left
+        socket.broadcast.to(curRoom).emit('user left', {
+          username: socket.username,
+          numUsers: io.sockets.adapter.rooms[curRoom].length
+        });
+      }
+
+    }
 
   });
 

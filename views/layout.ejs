@@ -9,6 +9,7 @@
     <link href = "/login.css" rel = "stylesheet">
     <link href = "/map.css" rel = "stylesheet">
     <link href = "/chat.css" rel = "stylesheet">
+    <link href = "/index.css" rel = "stylesheet">
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src = "https://code.jquery.com/jquery.js"></script>
@@ -20,72 +21,114 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <!-- Include Google Map API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDrw0qu9vdioc1eVDT-zWKX8T86QO2tTU&language=en&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDrw0qu9vdioc1eVDT-zWKX8T86QO2tTU&language=en&libraries=places,geometry&callback=initMap"
     async defer></script>
 
-    <script>
-      var map;
-
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 33.856, lng: -117.921},
-          zoom: 8
-        });
-      }
-
-    </script>
+    <!-- Manipulate Google map and preference -->
+    <script src="/googleMapEvent.js"></script>
 
   </head>
 
-  <body>
+  <body id="body">
 
-    <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="">Let's Hang Out</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/" id="home-btn">Home <span class="sr-only">(current)</span></a>
-          </li>
-
-          <% include ./partials/navbar %>
-          <!--
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Something else here</a>
+    <article id="preference-overlay">
+      <div>
+        <div>
+          <header>
+            <div class="title">
+              <div class="back"><i></i>Preference</div>
+              <div class="done"><i></i></div>
             </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">Disabled</a>
-          </li>
-          -->
-        </ul>
+            <div class="note">
+              <div>** Places will be filterd based on your preference</div>
+            </div>
+          </header>
+          <section>
+            <div id="attrList">
+              <div class="item">
+                <label class="text" for="check-d">
+                  <div class="title">Distance</div>
+                  <div class="info">near</div>
+                  <input type="range" class="info custom-range" id="distRange">
+                </label>
+                <div class="ui slider checkbox">
+                  <div class="info">far</div>
+                </div>
+              </div>
+              <div class="item">
+                <label class="text" for="check-TC">
+                  <div class="title">Price</div>
+                  <div class="info">low</div>
+                  <input type="range" class="info custom-range" id="priceRange">
+                </label>
+                <div class="ui slider checkbox">
+                  <div class="info">high</div>
+                </div>
+              </div>
+              <div class="item">
+                <label class="text" for="check-TC">
+                  <div class="title">Rating</div>
+                  <div class="info">low</div>
+                  <input type="range" class="info custom-range" id="rateRange">
+                </label>
+                <div class="ui slider checkbox">
+                  <div class="info">high</div>
+                </div>
+              </div>
 
-        <div class="btn-group before-login" id="buttons" role="group" aria-label="Basic example">
-          <% include ./partials/content %>
+            </div>
+          </section>
         </div>
-
-
       </div>
-    </div>
+    </article>
 
-    <%- body %>
+    <article id="container" style="height:100%; width:100%;">
+      <div class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="">Let's Hang Out</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <!--
-    <div class="card-footer text-white text-center bg-dark">
-      Developed by Chu-Hung Ho
-    </div>
-    -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/" id="home-btn">Home <span class="sr-only">(current)</span></a>
+            </li>
 
+            <% include ./partials/navbar %>
+            <!--
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" href="#">Disabled</a>
+            </li>
+            -->
+          </ul>
+
+          <div class="btn-group before-login" id="buttons" role="group" aria-label="Basic example">
+            <% include ./partials/content %>
+          </div>
+
+        </div>
+      </div>
+
+      <%- body %>
+
+      <!--
+      <div class="card-footer text-white text-center bg-dark">
+        Developed by Chu-Hung Ho
+      </div>
+      -->
+    </article>
   </body>
 
 </html>

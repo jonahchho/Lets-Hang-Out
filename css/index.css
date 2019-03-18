@@ -1,0 +1,332 @@
+@font-face{
+font-family:Icons;src:url(/icons.eot);
+src: url(/icons.eot?#iefix) format('embedded-opentype')
+, url(/icons.svg#icons) format('svg')
+, url(/icons.woff) format('woff')
+, url(/icons.ttf) format('truetype');
+font-style:normal;
+font-weight:400;
+font-variant:normal;
+text-decoration:inherit;
+text-transform:none }
+html, body {
+height: 100%;
+overflow-y: hidden; }
+body {
+font: normal 100% Helvetica, Arial, sans-serif;
+font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Jhenghei", sans-serif;
+color: #444; }
+.marker-label {
+color: white;
+background: rgba(0,0,0,.6);
+padding: 6px; }
+.marker-skyline {
+height: 24px;
+line-height: 24px;
+font-size: 24px;
+color: rgb(27,127,204); }
+.marker-skyline > i {
+display: inline-block;
+font-family: Icons;
+font-style: normal; }
+.marker-skyline > i:before {
+content: "\f005"; }
+
+body.preference > #container{
+filter: blur(5px);
+-webkit-filter: blur(5px);
+-moz-filter: blur(5px);
+-ms-filter: blur(5px); }
+
+body.preference > #preference-overlay{
+display: block; }
+
+body.preference.no-back > #preference-overlay header div.back > i {
+display: none; }
+
+#preference-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+bottom: 0;
+right: 0;
+z-index: 200;
+color: white;
+background: rgba(0,0,0,0.2); }
+
+#preference-overlay > div{
+position: relative;
+width: 100%;
+height: 100%; }
+
+#preference-overlay > div > div {
+position: relative;
+left: 50%;
+top: 50%;
+width: 300px;
+height: 460px;
+margin: -230px 0 0 -150px;
+text-align: center; }
+
+#preference-overlay header {
+position: relative;
+display: inline-block;
+width: 100%;
+color: rgb(119,107,94);
+background: rgba(248,243,230,.7);
+padding: 5px 0;
+border-radius: 4px 4px 0 0; }
+
+#preference-overlay header > div.title {
+position: relative;
+line-height: 38px;
+height: 50px;
+font-size: 26px;
+font-weight: bold;
+text-align: left;
+margin: 0 10px; }
+
+#preference-overlay header div.back {
+display: inline-block;
+cursor: pointer; }
+
+#preference-overlay header div.done {
+position: absolute;
+top: 0;
+right: 0;
+height: 38px;
+width: 38px;
+text-align: center;
+color: rgb(27,127,204);
+font-size: 30px;
+font-weight: normal;
+cursor: pointer; }
+
+#preference-overlay header div.back > i {
+margin-right: 5px; }
+
+#preference-overlay header div.back > i,
+#preference-overlay header div.done > i {
+display: inline-block;
+font-family: Icons;
+font-style: normal; }
+
+
+#preference-overlay header div.back > i:before {
+content: "\f104"; }
+
+#preference-overlay header div.done > i:before {
+content: "\f00c"; }
+
+#preference-overlay header > div.note {
+height: 32px;
+margin: 0 10px;
+color: #444; }
+
+#preference-overlay header > div.note > div {
+line-height: 16px;
+height: 16px;
+font-size: 14px;
+text-align: left; }
+
+#preference-overlay section {
+position: relative;
+width: 100%;
+height: 380px;
+font-size: 22px;
+color: rgb(241,196,15);
+background: rgba(0,0,0,.5);
+border-radius: 0 0 4px 4px;
+float: left;
+text-align: left;
+overflow-y: auto; }
+
+#attrList {
+margin: 5px; }
+
+#attrList > div.item {
+position: relative;
+height: 85px;
+font-size: 16px;
+padding: 4px 0;
+border-bottom: 1px solid rgba(255,255,255,.25);
+cursor: pointer; }
+
+#attrList > div.item > label.text {
+position: absolute;
+left: 0;
+top: 0;
+width: 100%;
+height: 46px;
+margin: 4px 0; }
+
+#attrList > div.item div.title {
+height: 30px;
+line-height: 1.5;
+color: rgba(255,255,255,1);
+font-size: 20px;
+margin: 0 0 0 3px; }
+
+#attrList > div.item div.info {
+height: 25px;
+line-height: 1.5;
+color: rgba(255,255,255,.5);
+font-size: 16px;
+margin: 0 0 0 3px; }
+
+#attrList > div.item > div.checkbox {
+position: absolute;
+right: 8px;
+bottom: 24px; }
+
+#attrList > div.item > div.checkbox label {
+padding: 0; }
+
+#attrList > div.item > div.checkbox label:after {
+-webkit-transition: background .1s ease 0s,left .1s ease 0s;
+-moz-transition: background .1s ease 0s,left .1s ease 0s;
+transition: background .1s ease 0s,left .1s ease 0s; }
+
+#attrList > div.item > div.checkbox label:before {
+-webkit-transition: left .1s ease 0s;
+-moz-transition: left .1s ease 0s;
+transition: left .1s ease 0s; }
+
+i.icon.loading:before {
+content: "\f110"; }
+@keyframes icon-loading{
+	from{
+		-webkit-transform:rotate(0deg);
+		-moz-transform:rotate(0deg);
+		-ms-transform:rotate(0deg);
+		transform:rotate(0deg)
+	}to{
+		-webkit-transform:rotate(360deg);
+		-moz-transform:rotate(360deg);
+		-ms-transform:rotate(360deg);
+		transform:rotate(360deg) }
+}
+@-moz-keyframes icon-loading{
+	from{
+		-moz-transform:rotate(0deg);
+		transform:rotate(0deg)
+	}to{
+		-moz-transform:rotate(360deg);
+		transform:rotate(360deg) }
+}
+@-webkit-keyframes icon-loading{
+	from{
+		-webkit-transform:rotate(0deg);
+		transform:rotate(0deg)
+	}to{
+		-webkit-transform:rotate(360deg);
+		transform:rotate(360deg) }
+}
+@-ms-keyframes icon-loading{
+	from{
+		-ms-transform:rotate(0deg);
+		transform:rotate(0deg)
+	}to{
+		-ms-transform:rotate(360deg);
+		transform:rotate(360deg) }
+}
+
+#container {
+position: fixed;
+left: 0;
+top: 0;
+bottom: 0;
+right: 0;
+background: inherit;
+z-index: 30;
+overflow-y: auto; }
+
+#container > header.header {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+height: 55px;
+background: rgba(255,255,255,.85);
+border-top: 1px solid #e7e7e7;
+z-index: 31; }
+
+#container > header.header > div {
+position: relative;
+height: 100%;
+width: 100%;
+max-width: 980px;
+margin: 0 auto; }
+
+#container > header.header > div > div {
+position: relative;
+width: 25%;
+height: 100%;
+line-height: 55px;
+font-size: 34px;
+color: rgb(0,153,204);
+text-align: center;
+cursor: pointer;
+float: left; }
+
+#container > header.header div.icon {
+position: relative;
+height: 30px;
+line-height: 30px;
+font-size: 24px;
+margin-top: 5px; }
+
+#container > header.header div.text {
+position: relative;
+height: 20px;
+line-height: 20px;
+font-size: 14px; }
+
+#container > header.header i {
+display: inline-block;
+font-family: Icons;
+font-style: normal; }
+
+#preference_btn i:before {
+content: "\f005"; }
+
+#container > section.map {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+z-index: 30; }
+
+#container > section.map > div {
+position: relative;
+width: 100%;
+height: 100%; }
+
+#container #map div.gm-style > div.gmnoprint:last-child {
+position: absolute !important;
+margin: 5px !important;
+left: 0 !important;
+top: 0 !important; }
+
+div.marker-scrollFix {
+line-height: 30px;
+font-size: 16px;
+overflow: hidden;
+white-space: nowrap; }
+
+div.marker-scrollFix > div.name {
+color: rgb(0,153,204);
+font-weight: bold; }
+
+div.marker-scrollFix > div.name i {
+font-size: 14px;
+margin: 0 0 0 5px; }
+
+div.marker-scrollFix > div.distance i {
+font-size: 14px;
+margin: 0 0 0 5px; }
+
+div.marker-scrollFix > div.ui.rating {
+font-size: 14px; }

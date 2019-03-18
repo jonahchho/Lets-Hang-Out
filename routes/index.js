@@ -28,16 +28,35 @@ router.get('/dashboard', ensureAuthenticated, (req, res) =>
 }));
 
 // Render messenger view in dashboard page
-router.get('/dashboard-messaging', ensureAuthenticated, (req, res) =>
+router.get('/dashboard-messaging', ensureAuthenticated, (req, res) => {
+
   res.render('dashboard-messaging', {
     username: req.user.username,
-    title: 'dashboard-messaging'
-}));
+    title: 'dashboard-messaging',
+  })
 
+});
+
+router.get('/query', ensureAuthenticated, (req, res) => {
+
+  var roomList = [];
+
+  Room.find({}, function(err, rooms) {
+
+    rooms.forEach(function(room) {
+      roomList.push({"room_id":room.room_id, "creater":room.creater});
+    });
+
+    res.send(roomList);
+
+  });
+
+});
 
 router.post('/dashboard-messaging', (req, res) => {
   const creater = req.user.username;
   var roomID = req.body.roomID;
+  console.log("POST");
 
   Room.findOne({room_id: roomID})
       .then(room => {
