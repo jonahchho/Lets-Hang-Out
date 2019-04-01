@@ -4,44 +4,6 @@ var myLocationMarker;
 var myLocationInfoWindow;
 var infoWindow;
 
-$( document ).ready(function() {
-
-  if(localStorage.getItem("distance")) {
-    document.getElementById('distRange').value = localStorage.getItem("distance");
-  }
-
-  if(localStorage.getItem("price")) {
-    document.getElementById('priceRange').value = localStorage.getItem("price");
-  }
-
-  if(localStorage.getItem("rating")) {
-    document.getElementById('rateRange').value = localStorage.getItem("rating");
-  }
-
-});
-
-$(document).on('click', '#preference_btn', function(e){
-  //console.log("Preference");
-  $('#body').addClass('preference');
-});
-
-$(document).on('click', '#body:not(.no-back) #preference-overlay header div.back', function(e){
-  $('#body').removeClass('preference');
-});
-
-$(document).on('click', '#preference-overlay header div.done', function(e){
-  setPreference();
-  $('#body').removeClass('preference');
-});
-
-function setPreference() {
-
-  localStorage.setItem("distance", document.getElementById('distRange').value);
-  localStorage.setItem("price", document.getElementById('priceRange').value);
-  localStorage.setItem("rating", document.getElementById('rateRange').value);
-
-}
-
 function initMap() {
 
   if(document.getElementById('map') !== null) {
@@ -62,6 +24,10 @@ function initMap() {
           lng: position.coords.longitude
         };
 
+        // Store user's position info in sessionStorage
+        sessionStorage.setItem("lat", position.coords.latitude);
+        sessionStorage.setItem("lng", position.coords.longitude);
+
         myLocationMarker = new google.maps.Marker({
           position: myLocation,
           map: map,
@@ -74,7 +40,36 @@ function initMap() {
           myLocationInfoWindow.open(map, myLocationMarker);
         });
 
-        map.setCenter(myLocation);
+
+        /* Setup Meeting Point for the users in the same chatroom.
+        var b = new google.maps.LatLngBounds();
+
+        b.extend( new google.maps.LatLng(33.878152, -117.983535) );
+        b.extend( new google.maps.LatLng(33.908318, -117.899037) );
+        b.extend( new google.maps.LatLng(33.822157, -117.951522) );
+        b.extend( new google.maps.LatLng(position.coords.latitude, position.coords.longitude) );
+
+        console.log(b.getCenter().lat());
+        console.log(b.getCenter().lng());
+
+        var meetingPoint = new google.maps.Marker({
+                  map: map,
+                  icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+                  position: {lat:b.getCenter().lat(), lng:b.getCenter().lng()},
+                  title: 'Meeting Point'
+                });
+
+        let meetingPointInfoWindow = new google.maps.InfoWindow;
+        meetingPointInfoWindow.setContent('Meeting Point');
+
+        meetingPoint.addListener('click', function() {
+          meetingPointInfoWindow.open(map, meetingPoint);
+        });
+
+        meetingPoint.setMap(map);
+        */
+
+
       }, function() {
         handleLocationError(true, myLocationInfoWindow, map.getCenter());
       });
@@ -116,9 +111,9 @@ function initMap() {
 
         markers = [];
 
-        let d = localStorage.getItem("distance") / 2;
-        let p = localStorage.getItem("price") / 20;
-        let r = localStorage.getItem("rating") / 20;
+        let d = sessionStorage.getItem("distance") / 2;
+        let p = sessionStorage.getItem("price") / 20;
+        let r = sessionStorage.getItem("rating") / 20;
 
         let myLCord = new google.maps.LatLng(myLocation.lat, myLocation.lng);
 

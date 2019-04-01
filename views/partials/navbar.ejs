@@ -1,8 +1,8 @@
 <!-- If the user already logged, then enables the "messaging" function -->
-<% if(title == 'dashboard' || title == 'dashboard-messaging') { %>
+<% if(title == 'dashboard') { %>
   <a class="nav-link" id="preference_btn" style="cursor: pointer;">Preference</a>
 
   <li class="nav-item">
-    <a class="nav-link" id="messaging" href="/dashboard-messaging">Messaging</a>
+    <a class="nav-link" id="chat" onclick="openForm()" style="cursor: pointer;">Chat</a>
   </li>
 <% } %>

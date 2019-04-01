@@ -70,22 +70,18 @@ app.use('/users', require('./routes/users'));
 
 // Chatroom
 
-var numUsers = 0;
-var curRoom = 0;
-
 io.on('connection', (socket) => {
 
   var addedUser = false;
 
   socket.on('create room', function (data) {
 
-    socket.username = data.username;
-
-    curRoom = data.roomID;
-
     addedUser = true;
 
-    socket.join(curRoom);
+    socket.roomID = data.roomID;
+    socket.username = data.username;
+
+    socket.join(socket.roomID);
 
   });
 
@@ -95,8 +91,6 @@ io.on('connection', (socket) => {
         .then(room => {
           if(room) {
 
-            socket.username = data.username;
-
             /*
             if(data.roomID != curRoom && curRoom != 0) {
 
@@ -105,20 +99,28 @@ io.on('connection', (socket) => {
               socket.broadcast.to(curRoom).emit('user left', {
                 // To Do
               });
-
-              curRoom = data.roomID;
-
+              
             }
             */
 
             addedUser = true;
 
-            socket.join(curRoom);
+            socket.join(data.roomID);
 
-            socket.broadcast.to(curRoom).emit('user joined', {
-              numUsers: io.sockets.adapter.rooms[curRoom].length,
-              username: data.username
+            socket.roomID = data.roomID;
+            socket.username = data.username;
+
+            socket.broadcast.to(socket.roomID).emit('user joined', {
+              numUsers: io.sockets.adapter.rooms[socket.roomID].length,
+              username: socket.username
             });
+
+            /*
+            for (socketID in io.sockets.adapter.rooms[curRoom].sockets) {
+               const nickname = io.sockets.connected[socketID].username;
+               console.log(nickname);
+            }
+            */
 
           }
 
@@ -133,22 +135,22 @@ io.on('connection', (socket) => {
   // when the client emits 'new message', this listens and executes
   socket.on('new message', function (data) {
   // we tell the client to execute 'new message'
-    socket.broadcast.to(curRoom).emit('new message', {
+    socket.broadcast.to(socket.roomID).emit('new message', {
       username: socket.username,
-      message: data
+      message: data.message
     });
   });
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', () => {
-    socket.broadcast.to(curRoom).emit('typing', {
+    socket.broadcast.to(socket.roomID).emit('typing', {
       username: socket.username
     });
   });
 
   // when the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', () => {
-    socket.broadcast.to(curRoom).emit('stop typing', {
+    socket.broadcast.to(socket.roomID).emit('stop typing', {
       username: socket.username
     });
   });
@@ -159,11 +161,11 @@ io.on('connection', (socket) => {
 
       addedUser = false;
 
-      socket.leave(curRoom);
+      socket.leave(socket.roomID);
 
-      if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
+      if(typeof io.sockets.adapter.rooms[socket.roomID] === "undefined") {
         // echo globally that this client has left
-        socket.broadcast.to(curRoom).emit('user left', {
+        socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
           numUsers: 0
         });
@@ -171,9 +173,9 @@ io.on('connection', (socket) => {
 
       else {
         // echo globally that this client has left
-        socket.broadcast.to(curRoom).emit('user left', {
+        socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
-          numUsers: io.sockets.adapter.rooms[curRoom].length
+          numUsers: io.sockets.adapter.rooms[socket.roomID].length
         });
       }
 
@@ -188,11 +190,11 @@ io.on('connection', (socket) => {
 
       addedUser = false;
 
-      socket.leave(curRoom);
+      socket.leave(socket.roomID);
 
-      if(typeof io.sockets.adapter.rooms[curRoom] === "undefined") {
+      if(typeof io.sockets.adapter.rooms[socket.roomID] === "undefined") {
         // echo globally that this client has left
-        socket.broadcast.to(curRoom).emit('user left', {
+        socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
           numUsers: 0
         });
@@ -200,9 +202,9 @@ io.on('connection', (socket) => {
 
       else {
         // echo globally that this client has left
-        socket.broadcast.to(curRoom).emit('user left', {
+        socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
-          numUsers: io.sockets.adapter.rooms[curRoom].length
+          numUsers: io.sockets.adapter.rooms[socket.roomID].length
         });
       }
 

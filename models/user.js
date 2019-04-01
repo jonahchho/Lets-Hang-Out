@@ -17,6 +17,18 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  p_distance: {
+    type: Number,
+    default: 0
+  },
+  p_price: {
+    type: Number,
+    default: 0
+  },
+  p_rate: {
+    type: Number,
+    default: 0
+  },
   date: {
     type: Date,
     default: Date.now

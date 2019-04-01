@@ -16,7 +16,7 @@ router.get('/login', (req, res) =>
 router.get('/register', (req, res) =>
   res.render('register', {
     title: 'register'
-  }));
+}));
 
 // Handle registration
 router.post('/register', (req, res) => {
@@ -39,11 +39,29 @@ router.post('/register', (req, res) => {
       username,
       email,
       password,
-      passwordConf
+      passwordConf,
+      title: 'register'
     });
   }
 
   else {
+
+    User.findOne({username: username})
+        .then(user => {
+          if(user) {
+            // User exists
+            errors.push({msg: 'Account already exists with this username'});
+            res.render('register', {
+              errors,
+              username,
+              email,
+              password,
+              passwordConf,
+              title: 'register'
+            });
+          }
+
+        });
 
     User.findOne({email: email})
         .then(user => {
@@ -55,7 +73,8 @@ router.post('/register', (req, res) => {
               username,
               email,
               password,
-              passwordConf
+              passwordConf,
+              title: 'register'
             });
           }
 

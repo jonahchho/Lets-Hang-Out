@@ -7,6 +7,9 @@ const {ensureAuthenticated} = require('../config/auth');
 // Room model
 const Room = require('../models/room');
 
+// User modesl
+const User = require('../models/user');
+
 // Home page
 router.get('/', (req, res) =>  {
   if(req.user) {
@@ -27,16 +30,6 @@ router.get('/dashboard', ensureAuthenticated, (req, res) =>
     title: 'dashboard'
 }));
 
-// Render messenger view in dashboard page
-router.get('/dashboard-messaging', ensureAuthenticated, (req, res) => {
-
-  res.render('dashboard-messaging', {
-    username: req.user.username,
-    title: 'dashboard-messaging',
-  })
-
-});
-
 router.get('/query', ensureAuthenticated, (req, res) => {
 
   var roomList = [];
@@ -53,7 +46,44 @@ router.get('/query', ensureAuthenticated, (req, res) => {
 
 });
 
-router.post('/dashboard-messaging', (req, res) => {
+router.get('/getUserPreference', ensureAuthenticated, (req, res) => {
+
+  var preferenceList = [];
+  var username = req.user.username;
+
+  User.findOne({username: username})
+      .then(user => {
+        preferenceList.push({"p_distance":user.p_distance, "p_price":user.p_price, "p_rate":user.p_rate});
+        res.send(preferenceList);
+      });
+
+});
+
+router.put('/updateUserPreference', function(req,res){
+    const data = req.body;
+
+    User.findOne({username: data.username})
+        .then(user => {
+
+          if(user) {
+            user.p_distance = data.p_distance;
+            user.p_price = data.p_price;
+            user.p_rate = data.p_rate;
+
+            user.save()
+              .then(doc => {
+                console.log(doc)
+                res.send('updated successfully');
+              })
+              .catch(err => {
+                console.error(err)
+              })
+
+          }
+        })
+});
+
+router.post('/dashboard', (req, res) => {
   const creater = req.user.username;
   var roomID = req.body.roomID;
   console.log("POST");
@@ -68,6 +98,7 @@ router.post('/dashboard-messaging', (req, res) => {
           room.save()
             .then(doc => {
               console.log(doc)
+              res.send('new room created successfully');
             })
             .catch(err => {
               console.error(err)
@@ -85,6 +116,7 @@ router.post('/dashboard-messaging', (req, res) => {
           newRoom.save()
             .then(doc => {
               console.log(doc)
+              res.send('new room created successfully');
             })
             .catch(err => {
               console.error(err)
@@ -92,8 +124,6 @@ router.post('/dashboard-messaging', (req, res) => {
 
         }
       });
-
-      res.end('It worked!');
 
 });
 
