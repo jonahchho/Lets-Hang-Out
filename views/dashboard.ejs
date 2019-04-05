@@ -50,6 +50,9 @@
   var connected = false;
   var typing = false;
   var socket = io();
+  var userMarkers = [];
+  var meetingPoint;
+  var usersBound;
 
   // Adds a message element to the messages and scrolls to the bottom
   // el - The element to add as a message
@@ -156,7 +159,9 @@
 
       socket.emit('create room', {
         roomID: roomID,
-        username: username
+        username: username,
+        location: [localStorage.getItem("lat"), localStorage.getItem("lng")],
+        preference: [localStorage.getItem("distance"), localStorage.getItem("price"), localStorage.getItem("rating")]
       });
 
     }
@@ -188,7 +193,11 @@
 
           var roomNum = prompt(words, "");
 
-          if(roomNum != null && !isNaN(roomNum)) {
+          if(roomNum != null && roomNum == roomID) {
+            alert("You are already in this room!!");
+          }
+
+          else if(roomNum != null && !isNaN(roomNum)) {
 
             if(connected) {
               document.getElementById("messages").style.display = "none";
@@ -203,7 +212,9 @@
 
             socket.emit('join room', {
               roomID: roomNum,
-              username: username
+              username: username,
+              location: [localStorage.getItem("lat"), localStorage.getItem("lng")],
+              preference: [localStorage.getItem("distance"), localStorage.getItem("price"), localStorage.getItem("rating")]
             });
 
             document.getElementById("messages").style.display = "block";
@@ -236,9 +247,22 @@
 
       connected = false;
 
+      localStorage.setItem("userList", null);
+
       socket.emit('leave room');
 
       $messages.empty();
+
+      userMarkers.forEach(function(marker) {
+        marker.setMap(null);
+      });
+
+      userMarkers = [];
+
+      if(typeof meetingPoint !== 'undefined') {
+        meetingPoint.setMap(null);
+        localStorage.setItem("meetingPoint", null);
+      }
 
     }
 
@@ -376,10 +400,73 @@
     addChatMessage(data);
   });
 
+  socket.on('update userlist', function (data) {
+    localStorage.setItem("userList", data.userList);
+  });
+
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', (data) => {
     log(data.username + ' joined');
     addParticipantsMessage(data);
+  });
+
+  socket.on('send userlist', (data) => {
+    localStorage.setItem("userList", data.userList);
+
+    usersBound = new google.maps.LatLngBounds();
+
+    let userList = JSON.parse(localStorage.getItem("userList"));
+
+    userList.forEach(function(user) {
+
+      if(user.username != username) {
+
+        let marker = new google.maps.Marker({
+          map: map,
+          title: user.username,
+          position: {lat: Number(user.lat), lng: Number(user.lng)}
+        });
+
+        let infoWindow = new google.maps.InfoWindow;
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infoWindow.setContent(user.username + '\'s location');
+          infoWindow.open(map, this);
+        });
+
+        userMarkers.push(marker);
+      }
+
+      usersBound.extend(new google.maps.LatLng(user.lat, user.lng));
+
+    });
+
+    if(typeof meetingPoint !== 'undefined') {
+      meetingPoint.setMap(null);
+      localStorage.setItem("meetingPoint", null);
+    }
+
+    if(userList.length > 1) {
+
+      meetingPoint = new google.maps.Marker({
+                map: map,
+                icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+                position: {lat:usersBound.getCenter().lat(), lng:usersBound.getCenter().lng()},
+                title: 'Meeting Point'
+              });
+
+      let meetingPointInfoWindow = new google.maps.InfoWindow;
+
+      google.maps.event.addListener(meetingPoint, 'click', function() {
+        meetingPointInfoWindow.setContent('Meeting Point');
+        meetingPointInfoWindow.open(map, this);
+      });
+
+      meetingPoint.setMap(map);
+      localStorage.setItem("meetingPoint", JSON.stringify({"lat": usersBound.getCenter().lat(), "lng": usersBound.getCenter().lng()}));
+
+    }
+
   });
 
   socket.on('empty room', (data) => {
@@ -403,6 +490,56 @@
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', (data) => {
+    localStorage.setItem("userList", data.userList);
+
+    usersBound = new google.maps.LatLngBounds();
+
+    // update user list
+    let index = 0;
+
+    userMarkers.forEach(function(marker) {
+      if(marker.title == data.username) {
+        marker.setMap(null);
+        return;
+      }
+
+      index++;
+    });
+
+    userMarkers.splice(index, 1);
+
+    let userList = JSON.parse(localStorage.getItem("userList"));
+
+    userList.forEach(function(user) {
+      usersBound.extend(new google.maps.LatLng(user.lat, user.lng));
+    });
+
+    if(typeof meetingPoint !== 'undefined') {
+      meetingPoint.setMap(null);
+      localStorage.setItem("meetingPoint", null);
+    }
+
+    if(userList.length > 1) {
+
+      meetingPoint = new google.maps.Marker({
+                map: map,
+                icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+                position: {lat:usersBound.getCenter().lat(), lng:usersBound.getCenter().lng()},
+                title: 'Meeting Point'
+              });
+
+      let meetingPointInfoWindow = new google.maps.InfoWindow;
+
+      google.maps.event.addListener(meetingPoint, 'click', function() {
+        meetingPointInfoWindow.setContent('Meeting Point');
+        meetingPointInfoWindow.open(map, this);
+      });
+
+      meetingPoint.setMap(map);
+      localStorage.setItem("meetingPoint", JSON.stringify({"lat": usersBound.getCenter().lat(), "lng": usersBound.getCenter().lng()}));
+
+    }
+
     log(data.username + ' left');
     addParticipantsMessage(data);
     removeChatTyping(data);
@@ -410,8 +547,9 @@
 
 
   socket.on('disconnect', () => {
+    meetingPoint.setMap(null);
+    localStorage.setItem("meetingPoint", null);
     log('you have been disconnected');
-
     document.getElementById("messages").style.display = "none";
     document.getElementById("inputMessage").style.display = "none";
     connected = false;

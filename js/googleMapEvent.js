@@ -9,7 +9,7 @@ function initMap() {
   if(document.getElementById('map') !== null) {
 
     map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 33.856, lng: -117.921},
+      center: {lat: 33.883163, lng: -117.886905},
       zoom: 12
     });
 
@@ -24,12 +24,15 @@ function initMap() {
           lng: position.coords.longitude
         };
 
-        // Store user's position info in sessionStorage
-        sessionStorage.setItem("lat", position.coords.latitude);
-        sessionStorage.setItem("lng", position.coords.longitude);
+        map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+
+        // Store user's position info in localStorage
+        localStorage.setItem("lat", position.coords.latitude);
+        localStorage.setItem("lng", position.coords.longitude);
 
         myLocationMarker = new google.maps.Marker({
-          position: myLocation,
+          //position: myLocation,
+          position:{lat: Number(localStorage.getItem("lat")), lng: Number(localStorage.getItem("lng"))},
           map: map,
           title: 'My location'
         });
@@ -39,36 +42,6 @@ function initMap() {
         myLocationMarker.addListener('click', function() {
           myLocationInfoWindow.open(map, myLocationMarker);
         });
-
-
-        /* Setup Meeting Point for the users in the same chatroom.
-        var b = new google.maps.LatLngBounds();
-
-        b.extend( new google.maps.LatLng(33.878152, -117.983535) );
-        b.extend( new google.maps.LatLng(33.908318, -117.899037) );
-        b.extend( new google.maps.LatLng(33.822157, -117.951522) );
-        b.extend( new google.maps.LatLng(position.coords.latitude, position.coords.longitude) );
-
-        console.log(b.getCenter().lat());
-        console.log(b.getCenter().lng());
-
-        var meetingPoint = new google.maps.Marker({
-                  map: map,
-                  icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
-                  position: {lat:b.getCenter().lat(), lng:b.getCenter().lng()},
-                  title: 'Meeting Point'
-                });
-
-        let meetingPointInfoWindow = new google.maps.InfoWindow;
-        meetingPointInfoWindow.setContent('Meeting Point');
-
-        meetingPoint.addListener('click', function() {
-          meetingPointInfoWindow.open(map, meetingPoint);
-        });
-
-        meetingPoint.setMap(map);
-        */
-
 
       }, function() {
         handleLocationError(true, myLocationInfoWindow, map.getCenter());
@@ -111,11 +84,43 @@ function initMap() {
 
         markers = [];
 
-        let d = sessionStorage.getItem("distance") / 2;
-        let p = sessionStorage.getItem("price") / 20;
-        let r = sessionStorage.getItem("rating") / 20;
+        let d = 0;
+        let p = 0;
+        let r = 0;
+        let myLCord;
 
-        let myLCord = new google.maps.LatLng(myLocation.lat, myLocation.lng);
+        if(localStorage.getItem("meetingPoint") != "null") {
+          let mpCord = JSON.parse(localStorage.getItem("meetingPoint"));
+
+          myLCord = new google.maps.LatLng(mpCord.lat, mpCord.lng);
+
+          let userList = JSON.parse(localStorage.getItem("userList"));
+
+          userList.forEach(function(user) {
+              d += Number(user.p_distance);
+              p += Number(user.p_price);
+              r += Number(user.p_rate);
+          });
+
+          d /= userList.length;
+          p /= userList.length;
+          r /= userList.length;
+
+          d /= 2;
+          p /= 20;
+          r /= 20;
+
+        }
+
+        else {
+
+          myLCord = new google.maps.LatLng(myLocation.lat, myLocation.lng);
+
+          d = localStorage.getItem("distance") / 2;
+          p = localStorage.getItem("price") / 20;
+          r = localStorage.getItem("rating") / 20;
+        }
+
 
         // For each place, get the icon, name and location.
         var bounds = new google.maps.LatLngBounds();

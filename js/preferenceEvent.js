@@ -1,12 +1,26 @@
 $( document ).ready(function() {
 
+  if(localStorage.getItem("distance")) {
+    document.getElementById('distRange').value = localStorage.getItem("distance");
+  }
+
+  if(localStorage.getItem("price")) {
+    document.getElementById('priceRange').value = localStorage.getItem("price");
+  }
+
+  if(localStorage.getItem("rating")) {
+    document.getElementById('rateRange').value = localStorage.getItem("rating");
+  }
+
   if(typeof username === 'undefined') {
-    sessionStorage.setItem("isLoggedIn", "false");
+    localStorage.setItem("isLoggedIn", "false");
+    localStorage.setItem("userList", null);
+    localStorage.setItem("meetingPoint", null);
   }
 
   else {
 
-    let isLoggedIn = sessionStorage.getItem("isLoggedIn");
+    let isLoggedIn = localStorage.getItem("isLoggedIn");
 
     if(isLoggedIn == "false") {
 
@@ -15,15 +29,15 @@ $( document ).ready(function() {
         type: 'get',
         dataType: 'json',
         success: function (data) {
-          sessionStorage.setItem("isLoggedIn", "true");
-          sessionStorage.setItem("distance", data[0].p_distance);
-          sessionStorage.setItem("price", data[0].p_price);
-          sessionStorage.setItem("rating", data[0].p_rate);
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("distance", data[0].p_distance);
+          localStorage.setItem("price", data[0].p_price);
+          localStorage.setItem("rating", data[0].p_rate);
 
 
-          document.getElementById('distRange').value = sessionStorage.getItem("distance");
-          document.getElementById('priceRange').value = sessionStorage.getItem("price");
-          document.getElementById('rateRange').value = sessionStorage.getItem("rating");
+          document.getElementById('distRange').value = localStorage.getItem("distance");
+          document.getElementById('priceRange').value = localStorage.getItem("price");
+          document.getElementById('rateRange').value = localStorage.getItem("rating");
 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -33,12 +47,17 @@ $( document ).ready(function() {
 
     }
 
+    else {
+      localStorage.setItem("userList", null);
+      localStorage.setItem("meetingPoint", null);
+    }
+
   }
 
 });
 
 $(document).on('click', '#logout_btn', function(e){
-  sessionStorage.setItem("isLoggedIn", "false");
+  localStorage.setItem("isLoggedIn", "false");
 });
 
 $(document).on('click', '#preference_btn', function(e){
@@ -57,9 +76,15 @@ $(document).on('click', '#preference-overlay header div.done', function(e){
 
 function setPreference() {
 
-  sessionStorage.setItem("distance", document.getElementById('distRange').value);
-  sessionStorage.setItem("price", document.getElementById('priceRange').value);
-  sessionStorage.setItem("rating", document.getElementById('rateRange').value);
+  localStorage.setItem("distance", document.getElementById('distRange').value);
+  localStorage.setItem("price", document.getElementById('priceRange').value);
+  localStorage.setItem("rating", document.getElementById('rateRange').value);
+
+  if(localStorage.getItem("userList") != "null") {
+    socket.emit('update userlist', {
+      preference: [localStorage.getItem("distance"), localStorage.getItem("price"), localStorage.getItem("rating")]
+    });
+  }
 
   $.ajax({
       type:'PUT',

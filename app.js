@@ -33,6 +33,7 @@ db.once('open', function () {
 app.use(express.static('css'));
 app.use(express.static('js'));
 app.use(express.static('fonts'));
+app.use(express.static('favicon'));
 
 // EJS
 app.use(expressLayouts);
@@ -78,10 +79,16 @@ io.on('connection', (socket) => {
 
     addedUser = true;
 
+    let userInfo = {"username": data.username, "lat": data.location[0], "lng": data.location[1],
+                    "p_distance": data.preference[0], "p_price": data.preference[1], "p_rate": data.preference[2]};
+
+    socket.join(data.roomID);
+
     socket.roomID = data.roomID;
     socket.username = data.username;
 
-    socket.join(socket.roomID);
+    io.sockets.adapter.rooms[socket.roomID].userList = [];
+    io.sockets.adapter.rooms[socket.roomID].userList.push(userInfo);
 
   });
 
@@ -99,28 +106,34 @@ io.on('connection', (socket) => {
               socket.broadcast.to(curRoom).emit('user left', {
                 // To Do
               });
-              
+
             }
             */
 
             addedUser = true;
+
+            let userInfo = {"username": data.username, "lat": data.location[0], "lng": data.location[1],
+                            "p_distance": data.preference[0], "p_price": data.preference[1], "p_rate": data.preference[2]};
 
             socket.join(data.roomID);
 
             socket.roomID = data.roomID;
             socket.username = data.username;
 
+            if(typeof io.sockets.adapter.rooms[socket.roomID].userList === "undefined") {
+              io.sockets.adapter.rooms[socket.roomID].userList = [];
+            }
+
+            io.sockets.adapter.rooms[socket.roomID].userList.push(userInfo);
+
             socket.broadcast.to(socket.roomID).emit('user joined', {
               numUsers: io.sockets.adapter.rooms[socket.roomID].length,
               username: socket.username
             });
 
-            /*
-            for (socketID in io.sockets.adapter.rooms[curRoom].sockets) {
-               const nickname = io.sockets.connected[socketID].username;
-               console.log(nickname);
-            }
-            */
+            io.in(socket.roomID).emit('send userlist', {
+              userList: JSON.stringify(io.sockets.adapter.rooms[socket.roomID].userList)
+            });
 
           }
 
@@ -130,6 +143,23 @@ io.on('connection', (socket) => {
 
         });
 
+  });
+
+  // when the client emits 'update preference', this listens and executes
+  socket.on('update userlist', function (data) {
+
+    for (let i in io.sockets.adapter.rooms[socket.roomID].userList) {
+     if (io.sockets.adapter.rooms[socket.roomID].userList[i].username == socket.username) {
+        io.sockets.adapter.rooms[socket.roomID].userList[i].p_distance = data.preference[0];
+        io.sockets.adapter.rooms[socket.roomID].userList[i].p_price = data.preference[1];
+        io.sockets.adapter.rooms[socket.roomID].userList[i].p_rate = data.preference[2];
+        break; //Stop this loop, we found it!
+     }
+   }
+
+    io.in(socket.roomID).emit('update userlist', {
+      userList: JSON.stringify(io.sockets.adapter.rooms[socket.roomID].userList)
+    });
   });
 
   // when the client emits 'new message', this listens and executes
@@ -167,15 +197,27 @@ io.on('connection', (socket) => {
         // echo globally that this client has left
         socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
-          numUsers: 0
+          numUsers: 0,
+          userList: null
         });
+
+        Room.deleteOne({room_id: socket.roomID}, function (err) {
+          console.log(err);
+        });
+
       }
 
       else {
+
+        io.sockets.adapter.rooms[socket.roomID].userList = io.sockets.adapter.rooms[socket.roomID].userList.filter(function( obj ) {
+          return obj.username != socket.username;
+        });
+
         // echo globally that this client has left
         socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
-          numUsers: io.sockets.adapter.rooms[socket.roomID].length
+          numUsers: io.sockets.adapter.rooms[socket.roomID].length,
+          userList: JSON.stringify(io.sockets.adapter.rooms[socket.roomID].userList)
         });
       }
 
@@ -198,13 +240,22 @@ io.on('connection', (socket) => {
           username: socket.username,
           numUsers: 0
         });
+
+        Room.deleteOne({room_id: socket.roomID}, function (err) {
+          console.log(err);
+        });
       }
 
       else {
+        io.sockets.adapter.rooms[socket.roomID].userList = io.sockets.adapter.rooms[socket.roomID].userList.filter(function( obj ) {
+          return obj.username != socket.username;
+        });
+
         // echo globally that this client has left
         socket.broadcast.to(socket.roomID).emit('user left', {
           username: socket.username,
-          numUsers: io.sockets.adapter.rooms[socket.roomID].length
+          numUsers: io.sockets.adapter.rooms[socket.roomID].length,
+          userList: JSON.stringify(io.sockets.adapter.rooms[socket.roomID].userList)
         });
       }
 
